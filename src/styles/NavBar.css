@@ -1,0 +1,46 @@
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 0;
+}
+
+.navbar-logo {
+    font-size: 24px;
+    font-weight: 700;
+    color: #121111;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.navbar-logo:hover {
+    opacity: 0.8;
+}
+
+.navbar-icons {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.navbar-icon-button {
+    padding: 8px;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.navbar-icon-button:hover {
+    background-color: #f3f4f6;
+}
+
+.navbar-icon-button svg {
+    width: 24px;
+    height: 24px;
+    color: #121111;
+}

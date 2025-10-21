@@ -1,0 +1,61 @@
+.travel-card {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.travel-card:hover {
+    transform: translateY(-4px);
+}
+
+.travel-card-image-container {
+    position: relative;
+    width: 100%;
+    height: 233px;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.travel-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.travel-card-avatar {
+    position: absolute;
+    bottom: -27px;
+    left: 16px;
+    width: 53px;
+    height: 54px;
+    border-radius: 50%;
+    border: 3px solid #ffffff;
+    object-fit: cover;
+}
+
+.travel-card-content {
+    padding: 32px 8px 0;
+}
+
+.travel-card-title {
+    font-size: 26px;
+    font-weight: 600;
+    color: #121111;
+    margin-bottom: 8px;
+    line-height: 1.3;
+}
+
+.travel-card-meta {
+    font-size: 20px;
+    color: #6d6d6d;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.travel-card-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
