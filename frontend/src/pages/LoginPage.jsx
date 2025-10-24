@@ -1,91 +1,122 @@
 import React, { useState } from 'react';
-import { LogInIcon } from '../assets/Icons'; // 👈 .jsx 확장자를 제거하여 수정
+
+// FastAPI 서버의 주소
+const API_BASE_URL = 'http://localhost:8000'; 
 
 /**
- * 로그인 페이지 (예약 시 요구됨)
- * @param {function} login - 전역 사용자 상태를 업데이트하는 함수
+ * 로그인 페이지 컴포넌트
+ * @param {function} login - [수정] App.jsx에서 받은 'handleLogin' 함수 (이름: login)
  * @param {function} navigateTo - 페이지 이동 함수
  */
+// [수정] 'setUser' prop 대신 'login' prop을 받습니다.
 const LoginPage = ({ login, navigateTo }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
+    const [loading, setLoading] = useState(false);
 
-  // NOTE: 실제 구현 시 이 함수는 FastAPI의 /auth/login 엔드포인트를 호출하도록 변경됩니다.
-  const handleLogin = (e) => {
-    e.preventDefault();
-    setError('');
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setErrorMessage('');
+        setLoading(true);
 
-    // --- Mock Authentication Logic ---
-    // 백엔드 연결 전까지는 이 목업 로직으로 로그인 성공을 시뮬레이션합니다.
-    if (email === 'user@travia.com' && password === '1234') {
-      // 실제 API 호출 시에는 받은 username을 사용합니다.
-      const mockUsername = "TraviaUser"; 
-      login(mockUsername); 
-      navigateTo('main'); // 로그인 성공 시 메인으로 이동
-    } else {
-      setError('이메일 또는 비밀번호가 올바르지 않습니다. (테스트 ID: user@travia.com / 1234)');
-    }
-  };
+        // 🚨 Seed Data에 정의된 계정으로 테스트하세요: traveler@travia.com / testpass123
+        const loginPayload = {
+            email: email,
+            password: password, // 평문 비밀번호 전송
+        };
 
-  return (
-    <div className="flex justify-center items-center min-h-[80vh] bg-gray-50 p-4">
-      <form onSubmit={handleLogin} className="w-full max-w-md bg-white p-8 rounded-xl shadow-2xl space-y-6 border-t-4 border-indigo-500">
-        <h2 className="text-2xl font-bold text-gray-900 text-center flex items-center justify-center space-x-2">
-            <LogInIcon className="w-6 h-6 text-indigo-500" />
-            <span>Travia 로그인</span>
-        </h2>
-        <p className="text-center text-gray-500">
-            예약, 리뷰 등 핵심 기능을 이용하려면 로그인해주세요.
-        </p>
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(loginPayload),
+            });
 
-        {error && (
-            <div className="p-3 bg-red-100 text-red-700 rounded-lg text-sm font-medium border border-red-300">
-                {error}
+            const result = await response.json();
+
+            if (response.ok) {
+                // 1. 로그인 성공 처리
+                // const { user_id, user_type } = result; // (App.jsx가 이 정보들을 아직 사용 안함)
+                
+                // [수정]
+                // 2. App.jsx가 넘겨준 'login' 함수를 'username'과 함께 호출합니다.
+                // App.jsx의 handleLogin 함수가 상태 업데이트와 페이지 이동('main')을 모두 처리합니다.
+                const username = email.split('@')[0]; // 임시 닉네임
+                login(username);
+                
+                // [수정] App.jsx의 login() 함수가 페이지 이동을 처리하므로 아래 코드는 삭제합니다.
+                // setUser({ ... });
+                // navigateTo('/'); 
+
+            } else {
+                // 로그인 실패 (400 Bad Request 등)
+                setErrorMessage(result.detail || '로그인에 실패했습니다. 이메일과 비밀번호를 확인해 주세요.');
+            }
+        } catch (error) {
+            console.error('Login request failed:', error);
+            setErrorMessage('네트워크 연결 또는 서버 오류가 발생했습니다.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="flex items-center justify-center min-h-screen bg-gray-50">
+            <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-2xl space-y-6">
+                <h2 className="text-3xl font-extrabold text-gray-900 text-center">
+                    Travia 로그인
+                </h2>
+                {errorMessage && (
+                    <div className="p-3 text-sm text-red-700 bg-red-100 rounded-lg text-center font-medium">
+                        {errorMessage}
+                    </div>
+                )}
+                <form className="space-y-6" onSubmit={handleLogin}>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">이메일</label>
+                        <input
+                            type="email"
+                            required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                            placeholder="user@example.com"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">비밀번호</label>
+                        <input
+                            type="password"
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                            placeholder="********"
+                        />
+                    </div>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition duration-150"
+                    >
+                        {loading ? '로그인 중...' : '로그인'}
+                    </button>
+                </form>
+                <div className="text-center text-sm">
+                    <button 
+                        // [수정] App.jsx의 라우팅 키에 맞게 '/' -> 'main'으로 변경
+                        onClick={() => navigateTo('main')}
+                        className="font-medium text-indigo-600 hover:text-indigo-500"
+                    >
+                        아직 회원이 아니신가요? (메인으로 돌아가기)
+                    </button>
+                </div>
             </div>
-        )}
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">이메일</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-            required
-            placeholder="user@travia.com"
-          />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">비밀번호</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-            required
-            placeholder="1234"
-          />
-        </div>
-        
-        <button
-          type="submit"
-          className="w-full flex justify-center items-center space-x-2 py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-200"
-        >
-            <LogInIcon className="w-5 h-5" />
-            <span>로그인</span>
-        </button>
-
-        <button 
-            type="button" 
-            onClick={() => navigateTo('main')}
-            className="w-full text-sm text-gray-500 hover:text-indigo-600 mt-4 transition duration-200"
-        >
-            메인 페이지로 돌아가기 (로그인 없이)
-        </button>
-      </form>
-    </div>
-  );
+    );
 };
 
 export default LoginPage;
